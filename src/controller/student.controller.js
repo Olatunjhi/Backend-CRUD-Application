@@ -1,4 +1,5 @@
 const Student = require("../model/student.schema");
+const pagination = require("../utils/student.pagination");
 
 const addStudent = async (req, res) => {
     const { firstName, lastName, age, email } = req.body;
@@ -31,9 +32,14 @@ const addStudent = async (req, res) => {
 }
 
 const getAllStudent = async (req, res) => {
+    const { page, limit, skip } = pagination(req.query);
     try {
-        const allStudents = await Student.find();
-        return res.status(200).json({message: 'All student data fetched successfully', allStudents, data: allStudents.length});
+        const students = await Student.find().select('_id firstName lastName').skip(skip).limit(limit);
+        return res.status(200).json({
+            page, 
+            students, 
+            data: students.length
+        });
 
     } catch (error) {
         console.error("error getting all students", error);
